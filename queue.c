@@ -99,14 +99,42 @@ int q_size(struct list_head *head)
 /* Delete the middle node in queue */
 bool q_delete_mid(struct list_head *head)
 {
-    // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
+    if (!head || list_empty(head))
+        return false;
+
+    struct list_head *slow = head->next, *fast = head->next, *tail = head->prev;
+
+    while (fast != tail && fast->next != tail) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    list_del(slow);
+    element_t *e = list_entry(slow, element_t, list);
+    q_release_element(e);
     return true;
 }
 
 /* Delete all nodes that have duplicate string */
 bool q_delete_dup(struct list_head *head)
 {
-    // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
+    if (!head)
+        return false;
+
+    bool isDup = false;
+    element_t *node, *safe;
+    list_for_each_entry_safe (node, safe, head, list) {
+        if (&safe->list != head && !strcmp(safe->value, node->value)) {
+            list_del(&node->list);
+            q_release_element(node);
+            isDup = true;
+        } else if (isDup) {
+            list_del(&node->list);
+            q_release_element(node);
+            isDup = false;
+        }
+    }
+
     return true;
 }
 
